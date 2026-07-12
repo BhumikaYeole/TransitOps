@@ -1,4 +1,3 @@
-
 export const allowRoles = (...roles) =>{
     return (req, res, next) => {
         if(!roles.includes(req.user.role)){
@@ -6,6 +5,7 @@ export const allowRoles = (...roles) =>{
                 message : "You do not have permission to access this resource"
             })
         }
+        next();
     }
 }
 
@@ -16,5 +16,6 @@ export const allowRole = (role) =>{
                 message : `${role}` + " role is required to access this resource"
             })
         }
+        next();
     }
 }

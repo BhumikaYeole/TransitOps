@@ -27,23 +27,24 @@ app.use("/api/auth", authRouter);
 
 // Protected Routes
 app.use("/api/vehicles", authorize, vehicleRouter);
+app.use("/api/drivers", authorize, driverRouter);
 app.use("/api/trips", authorize, tripRouter);
 app.use("/api/maintenance", authorize, maintenanceRouter);
 app.use("/api/fuel", authorize, fuelRouter);
 app.use("/api/expenses", authorize, expenseRouter);
 app.use("/api/reports", authorize, reportRouter);
-app.use("/api/drivers", authorize, driverRouter);
 
 // Health Check
 app.get("/", (req, res) => {
     res.send("TransitOps running");
 });
 
-// Global Error Handler (keep only ONE)
+// Global Error Handler
 app.use(errorMiddleware);
 
 // Start Server
 await connectToDatabase();
+
 app.listen(PORT, () => {
     console.log(`TransitOps running at http://localhost:${PORT}`);
 });
