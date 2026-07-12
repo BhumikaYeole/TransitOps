@@ -49,4 +49,6 @@ const driverSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Driver", driverSchema);
+const Driver = mongoose.model("Driver", driverSchema);
+
+export default Driver;

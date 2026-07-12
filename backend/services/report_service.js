@@ -4,7 +4,7 @@ import Driver from "../models/drivers.js";
 import Trip from "../models/trips.js";
 import FuelLog from "../models/fuellogs.js";
 import Expense from "../models/expenses.js";
-import Maintenance from "../models/maintainance.js";
+import Maintenance from "../models/maintenance.js";
 
 class ReportService {
   /**

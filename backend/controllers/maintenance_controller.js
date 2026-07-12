@@ -15,7 +15,7 @@ export const createMaintenance = async (req, res, next) => {
 
 export const getMaintenanceRecords = async (req, res, next) => {
   try {
-    const result = await MaintenanceService.getMainMaintenanceRecords(req.query);
+    const result = await MaintenanceService.getMaintenanceRecords(req.query);
     res.status(200).json({
       success: true,
       message: "Maintenance records retrieved successfully",

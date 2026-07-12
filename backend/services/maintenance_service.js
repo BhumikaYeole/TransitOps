@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Maintenance from "../models/maintainance.js";
+import Maintenance from "../models/maintenance.js";
 import Vehicle from "../models/vehicles.js";
 
 class MaintenanceService {

@@ -6,7 +6,7 @@ import {
     updateVehicle,
     deleteVehicle
 } from "../controllers/vehicle_controller.js";
-import allowRole from "../middleware/role_middleware.js";  
+import { allowRole } from "../middleware/role_middleware.js";
 
 const vehicleRouter = express.Router();
 

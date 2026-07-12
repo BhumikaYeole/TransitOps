@@ -1,47 +1,51 @@
-import express from "express"
-import { PORT } from "./config/env.js"
-import connectToDatabase from "./database/mongodb.js"
-import cookieParser from "cookie-parser"
-import authRouter from "./routes/auth_routes.js"
-import vehicleRouter from "./routes/vehicle_routes.js"
-import authorize from "./middleware/auth_middleware.js"
-import tripRouter from "./routes/trip_routes.js"
-import maintenanceRouter from "./routes/maintenance_routes.js"
-import allowRoles from "./middleware/role_middleware.js"
-import errorMiddleware from "./middleware/error_middleware.js"
+import express from "express";
+import { PORT } from "./config/env.js";
+import connectToDatabase from "./database/mongodb.js";
+import cookieParser from "cookie-parser";
 
-const app = express()
+import authRouter from "./routes/auth_routes.js";
+import vehicleRouter from "./routes/vehicle_routes.js";
+import tripRouter from "./routes/trip_routes.js";
+import maintenanceRouter from "./routes/maintenance_routes.js";
+import fuelRouter from "./routes/fuel_routes.js";
+import expenseRouter from "./routes/expense_routes.js";
+import reportRouter from "./routes/report_routes.js";
+import driverRouter from "./routes/driver_routes.js";
 
-app.use(express.json())
-app.use(cookieParser())
-app.use(express.urlencoded({extended : false}))
+import authorize from "./middleware/auth_middleware.js";
+import errorMiddleware from "./middleware/error_middleware.js";
 
-app.use(authorize)
-app.use(errorMiddleware)
+const app = express();
 
+// Middlewares
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
 
-app.use("/api/auth",authRouter);
+// Public Routes
+app.use("/api/auth", authRouter);
+
+// Protected Routes
+app.use("/api/vehicles", authorize, vehicleRouter);
 app.use("/api/trips", authorize, tripRouter);
 app.use("/api/maintenance", authorize, maintenanceRouter);
-app.use("/api/vehicles", vehicleRouter);
+app.use("/api/fuel", authorize, fuelRouter);
+app.use("/api/expenses", authorize, expenseRouter);
+app.use("/api/reports", authorize, reportRouter);
+app.use("/api/drivers", authorize, driverRouter);
 
-app.get("/", (req,res) => {
-    res.send("TransitOps running")
-})
-
-// Global Error Handler Middleware
-app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
-        success: false,
-        message: err.message || "Internal Server Error",
-        error: process.env.NODE_ENV === "development" ? err.stack : undefined
-    });
+// Health Check
+app.get("/", (req, res) => {
+    res.send("TransitOps running");
 });
 
-app.listen(PORT, async () => {
-    console.log(`TransitOps running at http://localhost:${PORT}`)
-    await connectToDatabase()
-})
+// Global Error Handler (keep only ONE)
+app.use(errorMiddleware);
+
+// Start Server
+await connectToDatabase();
+app.listen(PORT, () => {
+    console.log(`TransitOps running at http://localhost:${PORT}`);
+});
 
 export default app;
