@@ -12,7 +12,7 @@ export const signUp = async(req,res,next) => {
     session.startTransaction()
     try {
 
-        const {name, email, password} = req.body
+        const {name, email, password, role} = req.body
 
         // check for existing user
          const existingUser = await User.findOne({ email })
@@ -53,7 +53,7 @@ export const signUp = async(req,res,next) => {
 export const signIn = async (req,res,next) => {
     
     try {
-        const { email, password} = req.body
+        const { email, password, role} = req.body
         const user = await User.findOne({email})
 
         if(!user){
