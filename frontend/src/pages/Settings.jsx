@@ -21,17 +21,29 @@ function AccessMark({ value }) {
 }
 
 function TopHeader() {
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
+  const name = user?.name || "Raven K.";
+  const role = user?.role || "Dispatcher";
+
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <header className="p-6 border-b-[3px] border-black flex items-center justify-between bg-white" data-purpose="top-navigation">
       <div className="w-1/3">
-        <input className="app-input" placeholder="Search..." type="text" />
+        <input className="app-input" placeholder="Search settings..." type="text" />
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-sm font-bold text-black">Raven K.</span>
+        <span className="text-sm font-bold text-black">{name}</span>
         <div className="flex items-center gap-2 border-[3px] border-black rounded-full px-3 py-1 bg-brand shadow-neo-sm">
-          <span className="text-xs uppercase tracking-wider font-bold">Dispatcher</span>
+          <span className="text-xs uppercase tracking-wider font-bold">{role}</span>
           <div className="w-8 h-8 bg-info border-2 border-black rounded-full flex items-center justify-center text-white font-bold text-xs">
-            RK
+            {initials}
           </div>
         </div>
       </div>

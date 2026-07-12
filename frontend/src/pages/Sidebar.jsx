@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/" },
@@ -13,6 +13,14 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <aside
       className="w-64 shrink-0 border-r-3 border-black flex flex-col p-6 gap-8 bg-white"
@@ -20,7 +28,7 @@ export default function Sidebar() {
     >
       <div className="text-3xl font-bold tracking-tighter">TransitOps</div>
 
-      <nav className="flex flex-col gap-2 text-lg font-medium">
+      <nav className="flex flex-col gap-2 text-lg font-medium flex-1">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -34,6 +42,13 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <button
+        onClick={handleLogout}
+        className="sidebar-link block w-full py-2 px-4 text-left font-bold text-error border-2 border-transparent hover:border-error hover:bg-error/10 cursor-pointer"
+      >
+        Logout
+      </button>
     </aside>
   );
 }

@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { LuX, LuChevronDown, LuUser, LuMail, LuLock } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import API from "../services/api.js";
 
 const ROLES = [
-  { label: "Fleet Manager", value: "fleet-manager" },
-  { label: "Dispatcher", value: "dispatcher" },
-  { label: "Safety Officer", value: "safety" },
-  { label: "Financial Analyst", value: "analyst" },
+  { label: "Fleet Manager", value: "Fleet Manager" },
+  { label: "Dispatcher", value: "Dispatcher" },
+  { label: "Safety Officer", value: "Safety Officer" },
+  { label: "Financial Analyst", value: "Financial Analyst" },
 ];
 
 const ACCESS_SCOPE = [
@@ -55,14 +58,19 @@ function BrandingSidebar({ mode }) {
   );
 }
 
-function ErrorSticky() {
+function ErrorSticky({ error, onClose }) {
+  if (!error) return null;
   return (
-    <div className="hidden xl:block auth-error-sticky text-[#ff4d4d]" data-purpose="error-feedback">
-      <p className="text-xs font-bold mb-1 uppercase opacity-70">Error state</p>
+    <div className="xl:block auth-error-sticky text-[#ff4d4d] bg-[#121212] p-4 border-3 border-black shadow-neo-sm z-20" style={{ right: "-12rem" }} data-purpose="error-feedback">
+      <p className="text-xs font-bold mb-1 uppercase opacity-70 flex justify-between items-center">
+        <span>Error state</span>
+        <button type="button" onClick={onClose} className="text-gray-400 hover:text-white cursor-pointer">
+          <LuX size={14} strokeWidth={3} />
+        </button>
+      </p>
       <div className="flex items-start gap-2">
-        <LuX size={18} strokeWidth={3} className="shrink-0 mt-0.5" />
         <p className="text-sm font-medium leading-tight">
-          Invalid credentials. Account locked after 5 failed attempts.
+          {error}
         </p>
       </div>
     </div>
@@ -77,14 +85,14 @@ function RoleSelect({ id, value, onChange }) {
       </label>
       <div className="relative">
         <select
-          className="auth-input w-full p-4 rounded-lg focus:ring-0 appearance-none pr-12"
+          className="auth-input w-full p-4 rounded-lg focus:ring-0 appearance-none pr-12 text-white bg-[#1e1e1e]"
           id={id}
           name="role"
           value={value}
           onChange={onChange}
         >
           {ROLES.map((r) => (
-            <option key={r.value} value={r.value}>
+            <option key={r.value} value={r.value} className="text-white">
               {r.label}
             </option>
           ))}
@@ -99,11 +107,33 @@ function RoleSelect({ id, value, onChange }) {
   );
 }
 
-function LoginForm({ onSwitch }) {
-  const [role, setRole] = useState("dispatcher");
+function LoginForm({ onSwitch, setError, loading, setLoading }) {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Dispatcher");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await API.post("/auth/sign-in", { email, password, role });
+      localStorage.setItem("token", res.data.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.data.user));
+      toast.success("Successfully logged in!");
+      navigate("/");
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.error || "Invalid credentials. Please try again.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -119,11 +149,14 @@ function LoginForm({ onSwitch }) {
             Email
           </label>
           <input
-            className="auth-input w-full p-4 rounded-lg focus:ring-0"
+            className="auth-input w-full p-4 rounded-lg focus:ring-0 text-white"
             id="email"
             name="email"
             placeholder="Raven.k@transitops.in"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
           />
         </div>
 
@@ -132,11 +165,14 @@ function LoginForm({ onSwitch }) {
             Password
           </label>
           <input
-            className="auth-input w-full p-4 rounded-lg focus:ring-0"
+            className="auth-input w-full p-4 rounded-lg focus:ring-0 text-white"
             id="password"
             name="password"
             placeholder="••••••••"
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
         </div>
 
@@ -155,14 +191,18 @@ function LoginForm({ onSwitch }) {
           </a>
         </div>
 
-        <button className="auth-button w-full py-4 text-white font-bold text-xl uppercase tracking-wider" type="submit">
-          Sign In
+        <button
+          className="auth-button w-full py-4 text-black bg-brand hover:bg-[#ffd100]/95 font-bold text-xl uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Signing In..." : "Sign In"}
         </button>
       </form>
 
       <p className="mt-8 text-gray-400 text-sm">
         Don&apos;t have an account?{" "}
-        <button type="button" onClick={onSwitch} className="text-brand font-bold hover:underline">
+        <button type="button" onClick={onSwitch} className="text-brand font-bold hover:underline cursor-pointer">
           Sign up
         </button>
       </p>
@@ -170,11 +210,39 @@ function LoginForm({ onSwitch }) {
   );
 }
 
-function SignUpForm({ onSwitch }) {
-  const [role, setRole] = useState("dispatcher");
+function SignUpForm({ onSwitch, setError, loading, setLoading }) {
+  const navigate = useNavigate();
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("Dispatcher");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!fullname || !email || !password || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await API.post("/auth/sign-up", { name: fullname, email, password, role });
+      localStorage.setItem("token", res.data.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.data.user));
+      toast.success("Successfully registered!");
+      navigate("/");
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.error || "Registration failed. Please try again.";
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -191,11 +259,14 @@ function SignUpForm({ onSwitch }) {
           </label>
           <div className="relative">
             <input
-              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0"
+              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0 text-white"
               id="fullname"
               name="fullname"
               placeholder="Raven Kapoor"
               type="text"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
+              disabled={loading}
             />
             <LuUser size={18} strokeWidth={2.5} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
@@ -207,11 +278,14 @@ function SignUpForm({ onSwitch }) {
           </label>
           <div className="relative">
             <input
-              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0"
+              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0 text-white"
               id="signup-email"
               name="email"
               placeholder="Raven.k@transitops.in"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
             <LuMail size={18} strokeWidth={2.5} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
@@ -223,11 +297,14 @@ function SignUpForm({ onSwitch }) {
           </label>
           <div className="relative">
             <input
-              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0"
+              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0 text-white"
               id="signup-password"
               name="password"
               placeholder="••••••••"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
             <LuLock size={18} strokeWidth={2.5} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
@@ -239,11 +316,14 @@ function SignUpForm({ onSwitch }) {
           </label>
           <div className="relative">
             <input
-              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0"
+              className="auth-input w-full p-4 pl-12 rounded-lg focus:ring-0 text-white"
               id="confirm-password"
               name="confirmPassword"
               placeholder="••••••••"
               type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
             />
             <LuLock size={18} strokeWidth={2.5} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
@@ -261,14 +341,18 @@ function SignUpForm({ onSwitch }) {
           </span>
         </label>
 
-        <button className="auth-button w-full py-4 text-white font-bold text-xl uppercase tracking-wider" type="submit">
-          Create Account
+        <button
+          className="auth-button w-full py-4 text-black bg-brand hover:bg-[#ffd100]/95 font-bold text-xl uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Create Account"}
         </button>
       </form>
 
       <p className="mt-8 text-gray-400 text-sm">
         Already have an account?{" "}
-        <button type="button" onClick={onSwitch} className="text-brand font-bold hover:underline">
+        <button type="button" onClick={onSwitch} className="text-brand font-bold hover:underline cursor-pointer">
           Sign in
         </button>
       </p>
@@ -291,8 +375,13 @@ function AccessInfoFooter() {
 
 export default function AuthPage() {
   const [mode, setMode] = useState("signin");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const toggleMode = () => setMode((m) => (m === "signin" ? "signup" : "signin"));
+  const toggleMode = () => {
+    setError("");
+    setMode((m) => (m === "signin" ? "signup" : "signin"));
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row overflow-hidden font-sans">
@@ -300,9 +389,13 @@ export default function AuthPage() {
 
       <main className="md:w-7/12 w-full bg-[#121212] p-8 md:p-16 flex items-center justify-center relative" data-purpose="login-container">
         <div className="w-full max-w-md relative">
-          {mode === "signin" && <ErrorSticky />}
+          <ErrorSticky error={error} onClose={() => setError("")} />
 
-          {mode === "signin" ? <LoginForm onSwitch={toggleMode} /> : <SignUpForm onSwitch={toggleMode} />}
+          {mode === "signin" ? (
+            <LoginForm onSwitch={toggleMode} setError={setError} loading={loading} setLoading={setLoading} />
+          ) : (
+            <SignUpForm onSwitch={toggleMode} setError={setError} loading={loading} setLoading={setLoading} />
+          )}
 
           <AccessInfoFooter />
         </div>
