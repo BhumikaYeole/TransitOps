@@ -7,7 +7,6 @@ import vehicleRouter from "./routes/vehicle_routes.js"
 import authorize from "./middleware/auth_middleware.js"
 import tripRouter from "./routes/trip_routes.js"
 import maintenanceRouter from "./routes/maintenance_routes.js"
-import allowRoles from "./middleware/role_middleware.js"
 import errorMiddleware from "./middleware/error_middleware.js"
 
 const app = express()
@@ -16,14 +15,14 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({extended : false}))
 
-app.use(authorize)
-app.use(errorMiddleware)
-
-
 app.use("/api/auth",authRouter);
 app.use("/api/trips", authorize, tripRouter);
 app.use("/api/maintenance", authorize, maintenanceRouter);
 app.use("/api/vehicles", vehicleRouter);
+
+
+app.use(authorize)
+app.use(errorMiddleware)
 
 app.get("/", (req,res) => {
     res.send("TransitOps running")

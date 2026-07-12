@@ -39,4 +39,5 @@ const maintenanceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Maintenance", maintenanceSchema);
+const Maintenance = mongoose.model("Maintenance", maintenanceSchema);
+export default Maintenance;

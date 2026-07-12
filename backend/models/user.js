@@ -23,10 +23,22 @@ const userSchema = new mongoose.Schema({
     },
     role : {
         type : String,
-        enum : ['Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst'],
+        enum : ['Fleet Manager', 'Dispatcher', 'Safety Officer', 'Financial Analyst', 'Driver'],
         required : [true, "Please select a role"],
         trim : true,
-        lowercase : true
+        default : 'Driver'
+    },
+    failedLoginAttempts : {
+        type : Number,
+        default : 0
+    },
+    isLocked : {
+        type : Boolean,
+        default : false
+    },
+    lockUntil : {
+        type : Date,
+        default : null
     }
 } ,
     {
