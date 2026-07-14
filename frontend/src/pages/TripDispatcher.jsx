@@ -199,9 +199,11 @@ export default function TripDispatcher() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchDispatcherData();
+    async function loadData() {
+      await fetchDispatcherData(); 
+    }
+    loadData();
   }, []);
 
   const availableVehicles = vehicles.filter((v) => v.status === "AVAILABLE");

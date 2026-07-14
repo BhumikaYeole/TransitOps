@@ -309,6 +309,10 @@ export default function Registry() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
+  const userString = localStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
+
+
   const fetchVehicles = async () => {
     setLoading(true);
     setError(null);
@@ -517,7 +521,7 @@ export default function Registry() {
                   >
                     Status {sortField === "status" && (sortOrder === "asc" ? "▲" : "▼")}
                   </th>
-                  <th className="p-4 text-xs font-bold uppercase tracking-widest text-black">Actions</th>
+                  {user.role !== "Dispatcher" && user.role !== "Driver" ? <th className="p-4 text-xs font-bold uppercase tracking-widest text-black">Actions</th> : null}
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-black">
@@ -558,7 +562,8 @@ export default function Registry() {
                       <td className="p-4 border-r-2 border-black">
                         <span className={`app-badge ${getStatusBadge(vehicle.status)}`}>{vehicle.status}</span>
                       </td>
-                      <td className="p-4 flex gap-2">
+                      {user.role !== "Dispatcher" && user.role !== "Driver" ? 
+                      (<td className="p-4 flex gap-2">
                         <button
                           onClick={() => handleEdit(vehicle)}
                           className="p-1 border-2 border-black bg-brand hover:bg-[#ffd100]/90 cursor-pointer shadow-neo-sm"
@@ -573,7 +578,7 @@ export default function Registry() {
                         >
                           <LuTrash2 size={16} />
                         </button>
-                      </td>
+                      </td>) : null }
                     </tr>
                   ))
                 )}

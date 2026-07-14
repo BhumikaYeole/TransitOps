@@ -23,7 +23,8 @@ const maintenanceSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [
-        "ACTIVE",
+        "PENDING",
+        "IN PROGRESS",
         "COMPLETED",
       ],
       default: "ACTIVE",

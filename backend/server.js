@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { PORT } from "./config/env.js";
 import connectToDatabase from "./database/mongodb.js";
 import cookieParser from "cookie-parser";
@@ -17,7 +18,17 @@ import errorMiddleware from "./middleware/error_middleware.js";
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+};
+
 // Middlewares
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));

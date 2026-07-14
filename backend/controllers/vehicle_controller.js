@@ -47,11 +47,14 @@ export const addVehicle = async(req, res, next) => {
 export const getVehicles = async(req, res, next) => {
     try {
         const { status, type, region } = req.query;
+        
 
         let filter = {};
         if (status) filter.status = status.toUpperCase();
         if (type) filter.type = type;
         if (region) filter.region = region;
+
+        if(req.user.role == "Driver" || req.user.role == "Dispatcher") filter.status = ["AVAILABLE", "ON_TRIP"];
 
         const vehicles = await Vehicle.find(filter).sort({ registrationNumber: 1 });
 
