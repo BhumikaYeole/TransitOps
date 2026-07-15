@@ -7,6 +7,7 @@ import API from "../services/api.js";
 const ROLES = [
   { label: "Fleet Manager", value: "Fleet Manager" },
   { label: "Dispatcher", value: "Dispatcher" },
+  { label: "Driver", value: "Driver" },
   { label: "Safety Officer", value: "Safety Officer" },
   { label: "Financial Analyst", value: "Financial Analyst" },
 ];
@@ -14,6 +15,7 @@ const ROLES = [
 const ACCESS_SCOPE = [
   "Fleet Manager → Fleet, Maintenance",
   "Dispatcher → Dashboard, Trips",
+  "Driver → Driver Profile, Trips",
   "Safety Officer → Drivers, Compliance",
   "Financial Analyst → Fuel & Expenses, Analytics",
 ];
@@ -235,7 +237,12 @@ function SignUpForm({ onSwitch, setError, loading, setLoading }) {
       localStorage.setItem("token", res.data.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.data.user));
       toast.success("Successfully registered!");
-      navigate("/");
+
+      if (role === "Driver" || role === "Dispatcher") {
+        navigate("/driver-profile");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data?.error || "Registration failed. Please try again.";
       setError(msg);

@@ -251,7 +251,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchData();
+    async function loadData(){
+
+      fetchData();
+    }
+    loadData();
   }, []);
 
   const activeVehiclesCount = vehicles.filter((v) => v.status === "ON_TRIP").length;
