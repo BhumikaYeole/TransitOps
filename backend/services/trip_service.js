@@ -93,7 +93,7 @@ export const createTripService = async (tripData) => {
       source,
       destination,
       vehicle: vehicleId,
-      driver: driverId,
+      driver: driver,
       cargoWeight,
       plannedDistance,
       revenue,
@@ -481,7 +481,13 @@ export const getTripsService = async (query) => {
   const [trips, totalCount] = await Promise.all([
     Trip.find(filter)
       .populate("vehicle")
-      .populate("driver")
+      .populate({
+        path: "driver",
+        populate: {
+          path: "user",
+          select: "name email",
+        },
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit)),
@@ -503,7 +509,13 @@ export const getTripsService = async (query) => {
 export const getTripByIdService = async (tripId) => {
   const trip = await Trip.findById(tripId)
     .populate("vehicle")
-    .populate("driver");
+    .populate({
+      path: "driver",
+      populate: {
+        path: "user",
+        select: "name email",
+      },
+    });
 
   if (!trip) {
     const error = new Error("Trip not found");

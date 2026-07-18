@@ -8,7 +8,7 @@ const LIFECYCLE_STAGES = [
   { label: "Draft", color: "bg-success" },
   { label: "Dispatched", color: "bg-info" },
   { label: "Completed", color: "bg-gray-200" },
-  { label: "Cancelled", color: "bg-gray-200" },
+  { label: "Cancelled", color: "bg-red-400" },
 ];
 
 function TopHeader({ onRefresh, loading }) {
@@ -189,9 +189,12 @@ export default function TripDispatcher() {
         API.get("/vehicles"),
         API.get("/drivers"),
       ]);
+
+      // console.log(driversRes.data.data.drivers);
       setTrips(tripsRes.data.data.trips || []);
-      setVehicles(vehiclesRes.data.data.vehicles || []);
+      setVehicles(vehiclesRes.data.data || []);
       setDrivers(driversRes.data.data.drivers || []);
+      
     } catch (err) {
       console.error(err);
       toast.error("Failed to load dispatcher statistics");

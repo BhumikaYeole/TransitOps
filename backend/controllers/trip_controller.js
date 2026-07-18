@@ -19,6 +19,7 @@ export const createTrip = async (req, res, next) => {
       data: trip,
     });
   } catch (error) {
+    console.log(error)
     next(error);
   }
 };
