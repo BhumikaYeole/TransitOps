@@ -44,7 +44,8 @@ const NAV_ITEMS = [
   },
 ];
 
-const user = JSON.parse(localStorage.getItem("user"));
+const userString = localStorage.getItem("user");
+const user = userString ? JSON.parse(userString) : null;
 
 const filteredNavItems = NAV_ITEMS.filter((item) =>
   item.allowedRoles.includes(user.role)
