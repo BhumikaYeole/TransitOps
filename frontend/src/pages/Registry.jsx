@@ -30,13 +30,13 @@ function TopHeader({ searchTerm, setSearchTerm }) {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-bold text-black">{name}</span>
-        <div className="flex items-center gap-2 border-2 border-black p-1 pl-3 bg-info shadow-neo-sm">
-          <span className="text-xs font-bold text-white">{role}</span>
-          <div className="w-8 h-8 bg-white border-2 border-black flex items-center justify-center text-black font-bold">
-            {initials}
-          </div>
+      <div className="flex items-center space-x-6">
+        <div className="text-right">
+          <p className="font-bold text-sm">{name}</p>
+          <span className="text-xs uppercase font-black text-gray-500">{role}</span>
+        </div>
+        <div className="w-12 h-12 bg-brand border-3 border-black flex items-center justify-center font-bold text-lg shadow-neo-sm">
+          {initials}
         </div>
       </div>
     </header>

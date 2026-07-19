@@ -37,13 +37,13 @@ function TopBar({ onRefresh, onExport, loading }){
           <LuDownload size={18} /> <span className="font-bold text-lg text-black"> Export CSV</span>
         </button>
       </div>
-      <div className="flex items-center gap-6">
-        <span className="font-bold text-lg text-black">{name}</span>
-        <div className="flex items-center gap-3 bg-brand text-black px-4 py-2 border-3 border-black font-bold shadow-neo-sm">
-          <span>{role}</span>
-          <div className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center text-xs">
-            {initials}
-          </div>
+      <div className="flex items-center space-x-6">
+        <div className="text-right">
+          <p className="font-bold text-sm">{name}</p>
+          <span className="text-xs uppercase font-black text-gray-500">{role}</span>
+        </div>
+        <div className="w-12 h-12 bg-brand border-3 border-black flex items-center justify-center font-bold text-lg shadow-neo-sm">
+          {initials}
         </div>
       </div>
     </header>

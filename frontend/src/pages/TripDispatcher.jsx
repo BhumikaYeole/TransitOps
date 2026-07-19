@@ -37,12 +37,14 @@ function TopHeader({ onRefresh, loading }) {
           <LuRefreshCw size={18} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
-      <div className="flex items-center gap-4 ml-6">
-        <span className="text-gray-500 font-bold">{name}</span>
-        <div className="w-10 h-10 bg-info border-3 border-black flex items-center justify-center font-bold text-white rounded-full shadow-neo">
+      <div className="flex items-center space-x-6">
+        <div className="text-right">
+          <p className="font-bold text-sm">{name}</p>
+          <span className="text-xs uppercase font-black text-gray-500">{role}</span>
+        </div>
+        <div className="w-12 h-12 bg-brand border-3 border-black flex items-center justify-center font-bold text-lg shadow-neo-sm">
           {initials}
         </div>
-        <button className="btn-primary">{role}</button>
       </div>
     </header>
   );

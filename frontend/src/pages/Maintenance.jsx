@@ -30,13 +30,13 @@ function TopBar({ onRefresh, loading }) {
           <LuRefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </button>
       </div>
-      <div className="flex items-center space-x-4">
-        <span className="text-sm font-bold text-black">{name}</span>
-        <div className="flex items-center space-x-2 bg-black/5 border-2 border-black py-1 px-3 rounded-full">
-          <span className="text-xs font-bold">{role}</span>
-          <div className="w-7 h-7 rounded-full bg-info border border-black flex items-center justify-center text-[10px] font-bold text-white">
-            {initials}
-          </div>
+      <div className="flex items-center space-x-6">
+        <div className="text-right">
+          <p className="font-bold text-sm">{name}</p>
+          <span className="text-xs uppercase font-black text-gray-500">{role}</span>
+        </div>
+        <div className="w-12 h-12 bg-brand border-3 border-black flex items-center justify-center font-bold text-lg shadow-neo-sm">
+          {initials}
         </div>
       </div>
     </header>

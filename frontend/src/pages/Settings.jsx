@@ -38,13 +38,13 @@ function TopHeader() {
       <div className="w-1/3">
         <input className="app-input" placeholder="Search settings..." type="text" />
       </div>
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-bold text-black">{name}</span>
-        <div className="flex items-center gap-2 border-[3px] border-black rounded-full px-3 py-1 bg-brand shadow-neo-sm">
-          <span className="text-xs uppercase tracking-wider font-bold">{role}</span>
-          <div className="w-8 h-8 bg-info border-2 border-black rounded-full flex items-center justify-center text-white font-bold text-xs">
-            {initials}
-          </div>
+      <div className="flex items-center space-x-6">
+        <div className="text-right">
+          <p className="font-bold text-sm">{name}</p>
+          <span className="text-xs uppercase font-black text-gray-500">{role}</span>
+        </div>
+        <div className="w-12 h-12 bg-brand border-3 border-black flex items-center justify-center font-bold text-lg shadow-neo-sm">
+          {initials}
         </div>
       </div>
     </header>
