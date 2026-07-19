@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import API from "../services/api.js";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ function TopBar({ onRefresh, loading }) {
         <button
           onClick={onRefresh}
           disabled={loading}
-          className="border-3 border-black p-3 bg-brand hover:bg-[#ffd100]/90 disabled:opacity-50 cursor-pointer shadow-neo-sm shrink-0 flex items-center justify-center animate-none"
+          className="border-3 border-black p-3 bg-brand hover:bg-brand/90 disabled:opacity-50 cursor-pointer shadow-neo-sm shrink-0 flex items-center justify-center animate-none"
           title="Refresh reports"
         >
           <LuRefreshCw size={18} className={loading ? "animate-spin" : ""} />
@@ -47,7 +47,7 @@ function MetricCards({ metrics, loading }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" data-purpose="kpi-metrics">
       {metrics.map((metric) => (
-        <div key={metric.label} className={`app-card p-4 border-l-[12px] ${metric.accent} ${loading ? "animate-pulse" : ""}`}>
+        <div key={metric.label} className={`app-card p-4 border-l-12 ${metric.accent} ${loading ? "animate-pulse" : ""}`}>
           <p className="text-xs font-bold uppercase text-gray-600 mb-2">{metric.label}</p>
           <p className="text-3xl font-black text-black">
             {loading ? "..." : metric.value} {metric.unit && <span className="text-lg">{metric.unit}</span>}
@@ -128,22 +128,26 @@ export default function Analytics() {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [monthlyTrends, setMonthlyTrends] = useState({ revenue: [], expenses: [], fuel: [], trips: [] });
   const [vehiclePerformance, setVehiclePerformance] = useState([]);
-  const [expensesReport, setExpensesReport] = useState([]);
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
 
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const [dbStatsRes, monthlyRes, performanceRes, expensesRes] = await Promise.all([
+      const [dbStatsRes, monthlyRes, performanceRes] = await Promise.all([
         API.get("/reports/dashboard"),
-        API.get("/reports/monthly"),
+        API.get("/reports/trends"),
         API.get("/reports/vehicle-performance"),
-        API.get("/reports/expenses"),
       ]);
 
+      const performanceData = performanceRes.data.data || [];
       setDashboardStats(dbStatsRes.data.data);
       setMonthlyTrends(monthlyRes.data.data);
-      setVehiclePerformance(performanceRes.data.data);
-      setExpensesReport(expensesRes.data.data);
+      setVehiclePerformance(performanceData);
+      if (performanceData.length > 0) {
+        setSelectedVehicleId((current) => current || performanceData[0].vehicleId);
+      } else {
+        setSelectedVehicleId("");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to load analytics reports");
@@ -153,7 +157,11 @@ export default function Analytics() {
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    const timer = window.setTimeout(() => {
+      void fetchAnalytics();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Compute metrics from reports
@@ -172,6 +180,8 @@ export default function Analytics() {
     { label: "Vehicle ROI (Avg)", value: `${avgRoi}%`, accent: "border-l-red-600" },
   ];
 
+  const selectedVehicle = vehiclePerformance.find((vehicle) => vehicle.vehicleId === selectedVehicleId) || vehiclePerformance[0] || null;
+
   // Top Costliest Vehicles formatting
   const sortedVehicles = [...vehiclePerformance]
     .sort((a, b) => b.operationalCost - a.operationalCost)
@@ -181,7 +191,7 @@ export default function Analytics() {
   const colors = ["bg-rose-500", "bg-orange-600", "bg-blue-500"];
   
   const costBars = sortedVehicles.map((v, i) => ({
-    label: v.vehicleName || "Vehicle",
+    label: v.vehicleName || v.registrationNumber || "Vehicle",
     width: `${(v.operationalCost / maxCost) * 100}%`,
     color: colors[i] || "bg-blue-500",
     cost: v.operationalCost,
@@ -196,8 +206,81 @@ export default function Analytics() {
           <MetricCards metrics={metrics} loading={loading} />
           
           <div className="mb-4 italic text-sm text-gray-600">
-            ROI = (Revenue - Operational Cost) / Operational Cost
+            ROI = (Revenue - (Maintenance + Fuel)) / Acquisition Cost
           </div>
+
+          <div className="mt-6 mb-8">
+            <label className="block text-sm font-bold uppercase tracking-wide text-black mb-2" htmlFor="vehicle-select">
+              Select Vehicle
+            </label>
+            <select
+              id="vehicle-select"
+              value={selectedVehicleId}
+              onChange={(e) => setSelectedVehicleId(e.target.value)}
+              className="w-full max-w-md border-3 border-black bg-white px-4 py-3 text-sm font-semibold text-black shadow-neo-sm"
+            >
+              {vehiclePerformance.length === 0 ? (
+                <option value="">No vehicles available</option>
+              ) : (
+                vehiclePerformance.map((vehicle) => (
+                  <option key={vehicle.vehicleId} value={vehicle.vehicleId}>
+                    {vehicle.vehicleName}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+
+          {selectedVehicle && (
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10" data-purpose="selected-vehicle-metrics">
+              <div className="app-card p-4 border-l-12 border-l-blue-500">
+                <p className="text-xs font-bold uppercase text-gray-600 mb-2">Selected Vehicle ROI</p>
+                <p className="text-2xl font-black text-black">{selectedVehicle.roi.toFixed(1)}%</p>
+              </div>
+              <div className="app-card p-4 border-l-12 border-l-green-600">
+                <p className="text-xs font-bold uppercase text-gray-600 mb-2">Selected Fuel Efficiency</p>
+                <p className="text-2xl font-black text-black">{selectedVehicle.fuelEfficiency.toFixed(1)} km/l</p>
+              </div>
+              <div className="app-card p-4 border-l-12 border-l-orange-500">
+                <p className="text-xs font-bold uppercase text-gray-600 mb-2">Selected Operational Cost</p>
+                <p className="text-2xl font-black text-black">₹{selectedVehicle.operationalCost.toLocaleString()}</p>
+              </div>
+            </section>
+          )}
+
+          <section className="mb-10 border-2 border-black bg-white shadow-neo-sm" data-purpose="vehicle-performance-table">
+            <div className="border-b-2 border-black bg-brand px-4 py-3">
+              <h3 className="text-lg font-black uppercase tracking-wide text-black">Vehicle Metrics Overview</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="text-black text-xs uppercase tracking-wider border-b border-black/20">
+                    <th className="py-3 px-4 font-bold">Vehicle</th>
+                    <th className="py-3 px-4 font-bold">ROI</th>
+                    <th className="py-3 px-4 font-bold">Fuel Efficiency</th>
+                    <th className="py-3 px-4 font-bold">Operational Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vehiclePerformance.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="py-4 px-4 text-center font-bold text-gray-500">No vehicle performance data available.</td>
+                    </tr>
+                  ) : (
+                    vehiclePerformance.map((vehicle) => (
+                      <tr key={vehicle.vehicleId} className="border-b border-black/10 hover:bg-brand/10">
+                        <td className="py-3 px-4 font-bold text-black">{vehicle.vehicleName}</td>
+                        <td className="py-3 px-4 font-semibold">{vehicle.roi.toFixed(1)}%</td>
+                        <td className="py-3 px-4 font-semibold">{vehicle.fuelEfficiency.toFixed(1)} km/l</td>
+                        <td className="py-3 px-4 font-semibold">₹{vehicle.operationalCost.toLocaleString()}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-4">
             <RevenueChart revenueData={monthlyTrends.revenue || []} />

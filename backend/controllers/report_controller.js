@@ -1,11 +1,17 @@
-import ReportService from "../services/report_service.js";
+import {
+  getDashboardStatsService,
+  getMonthlyTrendsService,
+  getVehiclePerformanceService,
+  getExpenseReportService,
+} from "../services/report_service.js";
 
 export const getDashboardStats = async (req, res, next) => {
   try {
-    const stats = await ReportService.getDashboardStats();
+    const stats = await getDashboardStatsService();
+
     res.status(200).json({
       success: true,
-      message: "Dashboard analytics retrieved successfully",
+      message: "Dashboard statistics retrieved successfully",
       data: stats,
     });
   } catch (error) {
@@ -15,7 +21,8 @@ export const getDashboardStats = async (req, res, next) => {
 
 export const getMonthlyTrends = async (req, res, next) => {
   try {
-    const trends = await ReportService.getMonthlyTrends(req.query);
+    const trends = await getMonthlyTrendsService(req.query);
+
     res.status(200).json({
       success: true,
       message: "Monthly trends retrieved successfully",
@@ -28,10 +35,11 @@ export const getMonthlyTrends = async (req, res, next) => {
 
 export const getVehiclePerformance = async (req, res, next) => {
   try {
-    const performance = await ReportService.getVehiclePerformance();
+    const performance = await getVehiclePerformanceService();
+
     res.status(200).json({
       success: true,
-      message: "Vehicle performance report retrieved successfully",
+      message: "Vehicle performance retrieved successfully",
       data: performance,
     });
   } catch (error) {
@@ -41,11 +49,12 @@ export const getVehiclePerformance = async (req, res, next) => {
 
 export const getExpenseReport = async (req, res, next) => {
   try {
-    const expenses = await ReportService.getExpenseReport();
+    const report = await getExpenseReportService();
+
     res.status(200).json({
       success: true,
       message: "Expense report retrieved successfully",
-      data: expenses,
+      data: report,
     });
   } catch (error) {
     next(error);
