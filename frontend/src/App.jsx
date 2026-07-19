@@ -25,14 +25,21 @@ function ProtectedRoute({ children, allowedRoles }) {
     return <Navigate to="/login" replace />;
   }
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const userString = localStorage.getItem("user");
+
+  if (!userString) {
+    localStorage.removeItem("token");
+    return <Navigate to="/login" replace />;
+  }
+
+  const user = JSON.parse(userString);
 
   useEffect(() => {
     const checkDriverProfile = async () => {
       // Only Drivers/Dispatchers need a profile
       if (
-        user.role !== "Driver" &&
-        user.role !== "Dispatcher"
+        user?.role !== "Driver" &&
+        user?.role !== "Dispatcher"
       ) {
         setLoading(false);
         return;
@@ -58,14 +65,14 @@ function ProtectedRoute({ children, allowedRoles }) {
   }
 
   if (
-    (user.role === "Driver" || user.role === "Dispatcher") &&
+    (user?.role === "Driver" || user?.role === "Dispatcher") &&
     !profileExists &&
     location.pathname !== "/driver-profile"
   ) {
     return <Navigate to="/driver-profile" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
     return <Navigate to="/" replace />;
   }
 
