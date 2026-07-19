@@ -60,3 +60,22 @@ export const getExpenseReport = async (req, res, next) => {
     next(error);
   }
 };
+
+import { exportAnalyticsCSVService } from "../services/report_service.js";
+
+export const exportAnalyticsCSV = async (req, res, next) => {
+  try {
+    const csv = await exportAnalyticsCSVService();
+
+    res.header(
+      "Content-Type",
+      "text/csv"
+    );
+
+    res.attachment("analytics-report.csv");
+
+    return res.send(csv);
+  } catch (err) {
+    next(err);
+  }
+};

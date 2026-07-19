@@ -5,6 +5,7 @@ import {
   getMonthlyTrends,
   getVehiclePerformance,
   getExpenseReport,
+  exportAnalyticsCSV
 } from "../controllers/report_controller.js";
 
 import authorize from "../middleware/auth_middleware.js";
@@ -38,6 +39,13 @@ reportRouter.get(
   authorize,
   allowRole("Fleet Manager", "Financial Analyst"),
   getExpenseReport
+);
+
+reportRouter.get(
+  "/export",
+  authorize,
+  allowRole("Fleet Manager", "Financial Analyst"),
+  exportAnalyticsCSV
 );
 
 export default reportRouter;

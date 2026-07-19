@@ -536,6 +536,7 @@ export const getVehiclePerformanceService = async () => {
   return performance;
 };
 
+import { Parser } from "json2csv";
 export const getExpenseReportService = async () => {
   const categoryTotals = await Expense.aggregate([
     {
@@ -565,4 +566,56 @@ export const getExpenseReportService = async () => {
   ]);
 
   return categoryTotals;
+};
+
+
+export const exportAnalyticsCSVService = async () => {
+  const vehicles = await getVehiclePerformanceService();
+
+  const fields = [
+    {
+      label: "Vehicle",
+      value: "vehicleName",
+    },
+    {
+      label: "Registration Number",
+      value: "registrationNumber",
+    },
+    {
+      label: "Trips Completed",
+      value: "tripsCompleted",
+    },
+    {
+      label: "Fuel Efficiency (km/l)",
+      value: "fuelEfficiency",
+    },
+    {
+      label: "Revenue",
+      value: "revenue",
+    },
+    {
+      label: "Fuel Cost",
+      value: "fuelCost",
+    },
+    {
+      label: "Maintenance Cost",
+      value: "maintenanceCost",
+    },
+    {
+      label: "Operational Cost",
+      value: "operationalCost",
+    },
+    {
+      label: "Profit",
+      value: "profit",
+    },
+    {
+      label: "ROI (%)",
+      value: "roi",
+    },
+  ];
+
+  const parser = new Parser({ fields });
+
+  return parser.parse(vehicles);
 };

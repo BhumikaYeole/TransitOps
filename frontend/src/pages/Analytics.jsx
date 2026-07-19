@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import API from "../services/api.js";
 import { toast } from "sonner";
-import { LuRefreshCw } from "react-icons/lu";
+import { LuRefreshCw, LuDownload } from "react-icons/lu";
 
-function TopBar({ onRefresh, loading }) {
+function TopBar({ onRefresh, onExport, loading }){
   const userString = localStorage.getItem("user");
   const user = userString ? JSON.parse(userString) : null;
   const name = user?.name || "Raven K.";
@@ -28,6 +28,13 @@ function TopBar({ onRefresh, loading }) {
           title="Refresh reports"
         >
           <LuRefreshCw size={18} className={loading ? "animate-spin" : ""} />
+        </button>
+        <button
+          onClick={onExport}
+          className="border-3 border-black p-3 bg-green-500 hover:bg-green-600 cursor-pointer shadow-neo-sm shrink-0 flex items-center justify-center"
+          title="Export CSV"
+        >
+          <LuDownload size={18} /> <span className="font-bold text-lg text-black"> Export CSV</span>
         </button>
       </div>
       <div className="flex items-center gap-6">
@@ -156,6 +163,38 @@ export default function Analytics() {
     }
   };
 
+  const exportCSV = async () => {
+    try {
+      const response = await API.get("/reports/export", {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([response.data], {
+        type: "text/csv",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "analytics-report.csv";
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+
+      toast.success("CSV downloaded successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to export analytics");
+    }
+  };
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void fetchAnalytics();
@@ -202,7 +241,7 @@ export default function Analytics() {
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <main className="flex-1 flex flex-col overflow-y-auto p-8 bg-white" data-purpose="main-dashboard-area">
-          <TopBar onRefresh={fetchAnalytics} loading={loading} />
+          <TopBar onRefresh={fetchAnalytics} onExport={exportCSV} loading={loading}/>
           <MetricCards metrics={metrics} loading={loading} />
           
           <div className="mb-4 italic text-sm text-gray-600">
