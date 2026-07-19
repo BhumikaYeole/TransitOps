@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import API from "../services/api.js";
 import { toast } from "sonner";
@@ -61,7 +61,7 @@ function FuelModal({ isOpen, onClose, onSave, vehicles }) {
       onSave();
       onClose();
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data?.error || "Failed to log fuel entry.";
+      const msg =  err.data?.error || "Failed to log fuel entry.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -376,6 +376,28 @@ export default function FuelExpenses() {
   const totalExpenseCost = expenses.reduce((sum, item) => sum + (item.amount || 0), 0);
   const totalCost = totalFuelCost + totalExpenseCost;
 
+  const vehicleOperationalCosts = useMemo(() => {
+    const totals = new Map();
+
+    const addCost = (vehicle, amount) => {
+      if (!vehicle) return;
+
+      const key = vehicle._id || vehicle.registrationNumber || vehicle.model || "unknown";
+      const label = vehicle.model && vehicle.registrationNumber
+        ? `${vehicle.model} (${vehicle.registrationNumber})`
+        : vehicle.model || vehicle.registrationNumber || "Unknown Vehicle";
+
+      const existing = totals.get(key) || { id: key, label, totalCost: 0 };
+      existing.totalCost += Number(amount) || 0;
+      totals.set(key, existing);
+    };
+
+    fuelLogs.forEach((log) => addCost(log.vehicle, log.cost));
+    expenses.forEach((exp) => addCost(exp.vehicle, exp.amount));
+
+    return Array.from(totals.values()).sort((a, b) => b.totalCost - a.totalCost);
+  }, [fuelLogs, expenses]);
+
   // Filters
   const filteredFuelLogs = fuelLogs.filter((log) => {
     const reg = log.vehicle?.registrationNumber || "";
@@ -524,12 +546,42 @@ export default function FuelExpenses() {
             </div>
           </section>
 
-          <footer className="mt-8 pt-4 border-t-2 border-black flex justify-between items-center" data-purpose="summary-costs">
-            <div className="text-sm font-bold text-black uppercase">Total Operational Cost (Auto) = Fuel + Expenses</div>
-            <div className="text-3xl font-bold text-warning underline decoration-2 decoration-black">
-              ₹{totalCost.toLocaleString()}
+          <section className="mt-8 pt-4 border-t-2 border-black" data-purpose="vehicle-cost-breakdown">
+            <div className="flex justify-between items-end mb-4 flex-wrap gap-4">
+              <h2 className="text-xl font-bold uppercase tracking-wide text-black italic">Operational Cost by Vehicle</h2>
+              <div className="text-sm font-bold text-black uppercase">Fuel + Expenses</div>
             </div>
-          </footer>
+            <div className="border-t-2 border-black overflow-x-auto">
+              <table className="w-full text-left border-collapse" data-purpose="vehicle-cost-table">
+                <thead>
+                  <tr className="text-black text-xs uppercase tracking-wider border-b-2 border-black">
+                    <th className="py-4 font-bold border-r border-black/10">Vehicle</th>
+                    <th className="py-4 font-bold">Total Operational Cost</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {vehicleOperationalCosts.length === 0 ? (
+                    <tr>
+                      <td colSpan={2} className="py-4 text-center font-bold text-gray-500">No vehicle cost data available.</td>
+                    </tr>
+                  ) : (
+                    vehicleOperationalCosts.map((vehicle) => (
+                      <tr key={vehicle.id} className="border-b border-black hover:bg-brand/5">
+                        <td className="py-4 font-bold border-r border-black/10">{vehicle.label}</td>
+                        <td className="py-4 font-bold font-mono">₹{vehicle.totalCost.toLocaleString()}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-4 flex justify-end items-center gap-3">
+              <span className="text-sm font-bold text-black uppercase">Fleet Total</span>
+              <span className="text-2xl font-bold text-warning underline decoration-2 decoration-black">
+                ₹{totalCost.toLocaleString()}
+              </span>
+            </div>
+          </section>
         </main>
       </div>
 

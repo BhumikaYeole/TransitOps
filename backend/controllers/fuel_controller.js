@@ -1,8 +1,15 @@
-import FuelService from "../services/fuel_service.js";
+import {
+  createFuelLogService,
+  getFuelLogsService,
+  getFuelLogByIdService,
+  updateFuelLogService,
+  deleteFuelLogService,
+} from "../services/fuel_service.js";
 
 export const createFuelLog = async (req, res, next) => {
   try {
-    const record = await FuelService.createFuelLog(req.body);
+    const record = await createFuelLogService(req.body);
+
     res.status(201).json({
       success: true,
       message: "Fuel log created successfully",
@@ -15,7 +22,8 @@ export const createFuelLog = async (req, res, next) => {
 
 export const getFuelLogs = async (req, res, next) => {
   try {
-    const result = await FuelService.getFuelLogs(req.query);
+    const result = await getFuelLogsService(req.query);
+
     res.status(200).json({
       success: true,
       message: "Fuel logs retrieved successfully",
@@ -28,8 +36,8 @@ export const getFuelLogs = async (req, res, next) => {
 
 export const getFuelLogById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const record = await FuelService.getFuelLogById(id);
+    const record = await getFuelLogByIdService(req.params.id);
+
     res.status(200).json({
       success: true,
       message: "Fuel log retrieved successfully",
@@ -42,8 +50,11 @@ export const getFuelLogById = async (req, res, next) => {
 
 export const updateFuelLog = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const updatedRecord = await FuelService.updateFuelLog(id, req.body);
+    const updatedRecord = await updateFuelLogService(
+      req.params.id,
+      req.body
+    );
+
     res.status(200).json({
       success: true,
       message: "Fuel log updated successfully",
@@ -56,8 +67,8 @@ export const updateFuelLog = async (req, res, next) => {
 
 export const deleteFuelLog = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    await FuelService.deleteFuelLog(id);
+    await deleteFuelLogService(req.params.id);
+
     res.status(200).json({
       success: true,
       message: "Fuel log deleted successfully",

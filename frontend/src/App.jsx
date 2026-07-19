@@ -137,7 +137,7 @@ export default function App() {
         <Route
           path="/fuel-expenses"
           element={
-            <ProtectedRoute allowedRoles={["Fleet Manager", "Financial Analyst"]}>
+            <ProtectedRoute allowedRoles={["Fleet Manager", "Financial Analyst", "Driver", "Dispatcher"]}>
               <FuelExpenses />
             </ProtectedRoute>
           }

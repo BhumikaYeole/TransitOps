@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { body } from "express-validator";
 import {
   createFuelLog,
   getFuelLogs,
@@ -7,79 +6,44 @@ import {
   updateFuelLog,
   deleteFuelLog,
 } from "../controllers/fuel_controller.js";
-import { validateRequest } from "../middleware/validation_middleware.js";
+import authorize from "../middleware/auth_middleware.js";
+import { allowRole } from "../middleware/role_middleware.js";
 
 const fuelRouter = Router();
 
-// Create Fuel Log Validation Rules
-const createFuelLogValidation = [
-  body("vehicle")
-    .isMongoId()
-    .withMessage("A valid Vehicle ID is required"),
-  body("liters")
-    .notEmpty()
-    .withMessage("Fuel liters quantity is required")
-    .isFloat({ gt: 0 })
-    .withMessage("Fuel quantity must be greater than zero"),
-  body("cost")
-    .notEmpty()
-    .withMessage("Fuel cost is required")
-    .isFloat({ gt: 0 })
-    .withMessage("Cost must be a positive number"),
-  body("odometer")
-    .notEmpty()
-    .withMessage("Odometer reading is required")
-    .isFloat({ min: 0 })
-    .withMessage("Odometer reading cannot be negative"),
-  body("date")
-    .optional()
-    .isISO8601()
-    .withMessage("Date must be a valid ISO8601 date"),
-  body("fuelStation")
-    .optional()
-    .trim(),
-  body("remarks")
-    .optional()
-    .trim(),
-];
+fuelRouter.post(
+  "/",
+  authorize,
+  allowRole("Fleet Manager", "Driver", "Dispatcher"),
+  createFuelLog
+);
 
-// Update Fuel Log Validation Rules
-const updateFuelLogValidation = [
-  body("vehicle")
-    .optional()
-    .isMongoId()
-    .withMessage("Must be a valid Vehicle ID"),
-  body("liters")
-    .optional()
-    .isFloat({ gt: 0 })
-    .withMessage("Fuel quantity must be greater than zero"),
-  body("cost")
-    .optional()
-    .isFloat({ gt: 0 })
-    .withMessage("Cost must be a positive number"),
-  body("odometer")
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage("Odometer reading cannot be negative"),
-  body("date")
-    .optional()
-    .isISO8601()
-    .withMessage("Date must be a valid ISO8601 date"),
-  body("fuelStation")
-    .optional()
-    .trim(),
-  body("remarks")
-    .optional()
-    .trim(),
-];
+fuelRouter.get(
+  "/",
+  authorize,
+  allowRole("Fleet Manager", "Driver", "Dispatcher", "Financial Analyst"),
+  getFuelLogs
+);
 
-fuelRouter.route("/")
-  .post(createFuelLogValidation, validateRequest, createFuelLog)
-  .get(getFuelLogs);
+fuelRouter.get(
+  "/:id",
+  authorize,
+  allowRole("Fleet Manager", "Driver", "Dispatcher", "Financial Analyst"),
+  getFuelLogById
+);
 
-fuelRouter.route("/:id")
-  .get(getFuelLogById)
-  .put(updateFuelLogValidation, validateRequest, updateFuelLog)
-  .delete(deleteFuelLog);
+fuelRouter.put(
+  "/:id",
+  authorize,
+  allowRole("Fleet Manager", "Financial Analyst"),
+  updateFuelLog
+);
+
+fuelRouter.delete(
+  "/:id",
+  authorize,
+  allowRole("Fleet Manager"),
+  deleteFuelLog
+);
 
 export default fuelRouter;
