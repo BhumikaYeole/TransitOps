@@ -48,7 +48,7 @@ const userString = localStorage.getItem("user");
 const user = userString ? JSON.parse(userString) : null;
 
 const filteredNavItems = NAV_ITEMS.filter((item) =>
-  item.allowedRoles.includes(user.role)
+  item.allowedRoles.includes(user?.role)
 );
 export default function Sidebar() {
   const navigate = useNavigate();
