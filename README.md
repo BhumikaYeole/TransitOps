@@ -1,4 +1,4 @@
-# TransitOps
+# TransitOps - Odoo Hacakathon Submission
 
 **Smart Transport Operations Platform**
 

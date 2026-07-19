@@ -57,7 +57,7 @@ app.use(errorMiddleware);
 await connectToDatabase();
 
 app.listen(PORT, () => {
-    console.log(`TransitOps running at http://localhost:${PORT}`);
+    console.log(`TransitOps running`);
 });
 
 export default app;
